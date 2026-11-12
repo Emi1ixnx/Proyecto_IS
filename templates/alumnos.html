@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block titulo %}Alumnos{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-3">Capturar alumno</h1>
+
+{% if not materias %}
+  <div class="alert alert-warning">
+    Primero registra una materia en <a href="/materias" class="alert-link">Materias</a>
+    para poder agregarle alumnos.
+  </div>
+{% else %}
+  <form method="post" action="/alumnos" class="card card-body mb-4">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label for="id_materia" class="form-label">Materia</label>
+        <select class="form-select" id="id_materia" name="id_materia" required>
+          <option value="">Selecciona una materia…</option>
+          {% for m in materias %}
+            <option value="{{ m.id_materia }}" {% if datos.get('id_materia')|string == m.id_materia|string %}selected{% endif %}>{{ m.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label for="numero_cuenta" class="form-label">Número de cuenta</label>
+        <input type="text" class="form-control" id="numero_cuenta" name="numero_cuenta" maxlength="20"
+               value="{{ datos.get('numero_cuenta', '') }}" required>
+      </div>
+      <div class="col-md-6">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" maxlength="100"
+               value="{{ datos.get('nombre', '') }}" required>
+      </div>
+      <div class="col-md-6">
+        <label for="correo" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="correo" name="correo" maxlength="100"
+               value="{{ datos.get('correo', '') }}" required>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Guardar alumno</button>
+      </div>
+    </div>
+  </form>
+{% endif %}
+{% endblock %}
