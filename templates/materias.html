@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block titulo %}Materias{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-3">Registrar materia</h1>
+
+<form method="post" class="card card-body mb-4">
+  <div class="row g-3">
+    <div class="col-12">
+      <label for="nombre" class="form-label">Nombre de la materia</label>
+      <input type="text" class="form-control" id="nombre" name="nombre" maxlength="100"
+             value="{{ datos.nombre }}" required>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label d-block">Días de clase</label>
+      {% for numero, abreviatura, nombre in dias_semana %}
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="dias" id="dia{{ numero }}"
+                 value="{{ numero }}" {% if numero|string in datos.dias %}checked{% endif %}>
+          <label class="form-check-label" for="dia{{ numero }}" title="{{ nombre }}">{{ abreviatura }}</label>
+        </div>
+      {% endfor %}
+      <div class="form-text">L = lunes, M = martes, M = miércoles, J = jueves, V = viernes, S = sábado.</div>
+    </div>
+
+    <div class="col-md-6">
+      <label for="fecha_inicio" class="form-label">Fecha de inicio <span class="text-muted">(opcional)</span></label>
+      <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ datos.fecha_inicio }}">
+    </div>
+    <div class="col-md-6">
+      <label for="fecha_fin" class="form-label">Fecha de término <span class="text-muted">(opcional)</span></label>
+      <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ datos.fecha_fin }}">
+    </div>
+
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">Guardar materia</button>
+    </div>
+  </div>
+</form>
+
+<h2 class="h5">Materias registradas</h2>
+{% if materias %}
+  <div class="table-responsive">
+    <table class="table table-striped bg-white">
+      <thead class="table-dark">
+        <tr><th>Materia</th><th>Días de clase</th><th>Inicio</th><th>Término</th></tr>
+      </thead>
+      <tbody>
+        {% for m in materias %}
+          <tr>
+            <td>{{ m.nombre }}</td>
+            <td>{{ m.dias_clase|dias_legibles }}</td>
+            <td>{{ m.fecha_inicio or "—" }}</td>
+            <td>{{ m.fecha_fin or "—" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="text-muted">Todavía no hay materias registradas.</p>
+{% endif %}
+{% endblock %}
