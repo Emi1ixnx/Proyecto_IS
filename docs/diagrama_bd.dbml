@@ -1,0 +1,37 @@
+// Diagrama de la base de datos - pegar en https://dbdiagram.io (Import > DBML)
+
+Table materia {
+  id_materia   integer [pk, increment]
+  nombre       text    [not null]
+  dias_clase   text    [not null, note: 'Números de día 0=lunes ... 5=sábado, p. ej. 0,2,4']
+  fecha_inicio text    [note: 'Opcional, AAAA-MM-DD']
+  fecha_fin    text    [note: 'Opcional, AAAA-MM-DD']
+}
+
+Table alumno {
+  id_alumno     integer [pk, increment]
+  numero_cuenta text    [not null]
+  nombre        text    [not null]
+  correo        text    [not null]
+  id_materia    integer [not null]
+
+  indexes {
+    (id_materia, numero_cuenta) [unique, note: 'RN03']
+  }
+}
+
+Table asistencia {
+  id_asistencia integer [pk, increment]
+  id_materia    integer [not null]
+  id_alumno     integer [not null]
+  fecha         text    [not null, note: 'AAAA-MM-DD']
+  estado        text    [not null, note: 'Presente o Ausente']
+
+  indexes {
+    (id_alumno, fecha) [unique, note: 'RN07']
+  }
+}
+
+Ref: alumno.id_materia > materia.id_materia
+Ref: asistencia.id_materia > materia.id_materia
+Ref: asistencia.id_alumno > alumno.id_alumno
