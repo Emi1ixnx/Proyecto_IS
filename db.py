@@ -62,3 +62,19 @@ def dias_legibles(texto):
     """'0,2,4' -> 'Lunes, Miércoles, Viernes' (para mostrar en pantalla)."""
     nombres = {numero: nombre for numero, _, nombre in DIAS_SEMANA}
     return ", ".join(nombres[d] for d in texto_a_dias(texto))
+
+
+# ---------------------------------------------------------------- Materias
+def guardar_materia(nombre, dias_clase, fecha_inicio=None, fecha_fin=None):
+    conexion = get_db()
+    cursor = conexion.execute(
+        "INSERT INTO materia (nombre, dias_clase, fecha_inicio, fecha_fin) "
+        "VALUES (?, ?, ?, ?)",
+        (nombre, dias_clase, fecha_inicio, fecha_fin),
+    )
+    conexion.commit()
+    return cursor.lastrowid
+
+
+def listar_materias():
+    return get_db().execute("SELECT * FROM materia ORDER BY nombre").fetchall()

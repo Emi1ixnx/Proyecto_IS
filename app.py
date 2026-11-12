@@ -5,8 +5,9 @@ pasa lista por fecha y consulta el resumen de asistencia.
 """
 
 import os
+from datetime import date
 
-from flask import Flask, render_template
+from flask import Flask, flash, redirect, render_template, request, url_for
 
 import db
 
@@ -16,11 +17,63 @@ app.config["DATABASE"] = os.environ.get(
     "ASISTENCIA_DB", os.path.join(app.root_path, "asistencia.db")
 )
 db.init_app(app)
+app.add_template_filter(db.dias_legibles, "dias_legibles")
 
 
 @app.route("/")
 def index():
     return render_template("base.html")
+
+
+# ---------------------------------------------------------------- Materias (HU01)
+def validar_materia(datos):
+    """RN01 y RN02. Devuelve la lista de errores (vacía si todo está bien)."""
+    errores = []
+    if not datos["nombre"]:
+        errores.append("El nombre de la materia es obligatorio.")
+    if not datos["dias"]:
+        errores.append("Selecciona al menos un día de clase.")
+
+    fechas = {}
+    for campo, etiqueta in (("fecha_inicio", "inicio"), ("fecha_fin", "término")):
+        if datos[campo]:
+            try:
+                fechas[campo] = date.fromisoformat(datos[campo])
+            except ValueError:
+                errores.append(f"La fecha de {etiqueta} no es válida.")
+    if len(fechas) == 2 and fechas["fecha_inicio"] > fechas["fecha_fin"]:
+        errores.append("La fecha de inicio no puede ser posterior a la de término.")
+    return errores
+
+
+@app.route("/materias", methods=["GET", "POST"])
+def materias():
+    datos = {"nombre": "", "dias": [], "fecha_inicio": "", "fecha_fin": ""}
+    if request.method == "POST":
+        datos = {
+            "nombre": request.form.get("nombre", "").strip(),
+            "dias": [d for d in request.form.getlist("dias") if d in db.VALORES_DIAS],
+            "fecha_inicio": request.form.get("fecha_inicio", "").strip(),
+            "fecha_fin": request.form.get("fecha_fin", "").strip(),
+        }
+        errores = validar_materia(datos)
+        if not errores:
+            db.guardar_materia(
+                datos["nombre"],
+                db.dias_a_texto(datos["dias"]),
+                datos["fecha_inicio"] or None,
+                datos["fecha_fin"] or None,
+            )
+            flash("Materia registrada correctamente.", "success")
+            return redirect(url_for("materias"))
+        for error in errores:
+            flash(error, "danger")
+    return render_template(
+        "materias.html",
+        materias=db.listar_materias(),
+        datos=datos,
+        dias_semana=db.DIAS_SEMANA,
+    )
 
 
 if __name__ == "__main__":
