@@ -31,3 +31,34 @@ def init_app(app):
     app.teardown_appcontext(close_db)
     with app.app_context():
         init_db()
+
+
+# ------------------------------------------------------------ Días de clase
+# Se guardan como números de date.weekday() (0 = lunes ... 5 = sábado) en un
+# TEXT separado por comas, por ejemplo "0,2,4". Así la validación compara
+# directo con el día de la fecha y no se confunden las dos «M» (martes/miércoles).
+DIAS_SEMANA = [
+    (0, "L", "Lunes"),
+    (1, "M", "Martes"),
+    (2, "M", "Miércoles"),
+    (3, "J", "Jueves"),
+    (4, "V", "Viernes"),
+    (5, "S", "Sábado"),
+]
+VALORES_DIAS = [str(numero) for numero, _, _ in DIAS_SEMANA]
+
+
+def dias_a_texto(dias):
+    """['2', '0', '4'] -> '0,2,4' (listo para guardar en SQLite)."""
+    return ",".join(str(d) for d in sorted({int(d) for d in dias}))
+
+
+def texto_a_dias(texto):
+    """'0,2,4' -> [0, 2, 4] (para comparar con date.weekday())."""
+    return [int(d) for d in (texto or "").split(",") if d.strip() != ""]
+
+
+def dias_legibles(texto):
+    """'0,2,4' -> 'Lunes, Miércoles, Viernes' (para mostrar en pantalla)."""
+    nombres = {numero: nombre for numero, _, nombre in DIAS_SEMANA}
+    return ", ".join(nombres[d] for d in texto_a_dias(texto))
