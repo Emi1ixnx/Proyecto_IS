@@ -76,5 +76,20 @@ def materias():
     )
 
 
+# ---------------------------------------------------------------- Alumnos (HU02)
+@app.route("/alumnos", methods=["GET", "POST"])
+def alumnos():
+    if request.method == "POST":
+        db.guardar_alumno(
+            request.form.get("id_materia", ""),
+            request.form.get("numero_cuenta", "").strip(),
+            request.form.get("nombre", "").strip(),
+            request.form.get("correo", "").strip(),
+        )
+        flash("Alumno guardado correctamente.", "success")
+        return redirect(url_for("alumnos"))
+    return render_template("alumnos.html", materias=db.listar_materias(), datos={})
+
+
 if __name__ == "__main__":
     app.run(debug=True)

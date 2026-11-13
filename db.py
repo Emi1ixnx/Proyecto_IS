@@ -78,3 +78,15 @@ def guardar_materia(nombre, dias_clase, fecha_inicio=None, fecha_fin=None):
 
 def listar_materias():
     return get_db().execute("SELECT * FROM materia ORDER BY nombre").fetchall()
+
+
+# ----------------------------------------------------------------- Alumnos
+def guardar_alumno(id_materia, numero_cuenta, nombre, correo):
+    conexion = get_db()
+    cursor = conexion.execute(
+        "INSERT INTO alumno (numero_cuenta, nombre, correo, id_materia) "
+        "VALUES (?, ?, ?, ?)",
+        (numero_cuenta, nombre, correo, id_materia),
+    )
+    conexion.commit()
+    return cursor.lastrowid
