@@ -76,5 +76,74 @@ def materias():
     )
 
 
+# ---------------------------------------------------------------- Alumnos (HU02)
+@app.route("/alumnos", methods=["GET", "POST"])
+def alumnos():
+    if request.method == "POST":
+        db.guardar_alumno(
+            request.form.get("id_materia", ""),
+            request.form.get("numero_cuenta", "").strip(),
+            request.form.get("nombre", "").strip(),
+            request.form.get("correo", "").strip(),
+        )
+        flash("Alumno guardado correctamente.", "success")
+        return redirect(url_for("alumnos"))
+    return render_template("alumnos.html", materias=db.listar_materias(), datos={})
+
+
+# ------------------------------------------------- Asistencia (HU03, HU04, HU05)
+def formatear_fecha(texto):
+    """'2026-11-16' -> '16/11/2026'."""
+    return date.fromisoformat(texto).strftime("%d/%m/%Y")
+
+
+def validar_dia_de_clase(materia, fecha_texto):
+    """RN05. Devuelve un mensaje de error, o None si se puede pasar lista."""
+    if materia is None:
+        return "Selecciona una materia registrada."
+    try:
+        fecha = date.fromisoformat(fecha_texto)
+        if fecha.isoformat() != fecha_texto:
+            raise ValueError
+    except ValueError:
+        return "Selecciona una fecha válida."
+
+    if fecha.weekday() not in db.texto_a_dias(materia["dias_clase"]):
+        return (
+            f"El {formatear_fecha(fecha_texto)} no es día de clase de {materia['nombre']}. "
+            f"Se imparte: {db.dias_legibles(materia['dias_clase'])}."
+        )
+    if materia["fecha_inicio"] and fecha_texto < materia["fecha_inicio"]:
+        return (
+            f"{materia['nombre']} inicia el {formatear_fecha(materia['fecha_inicio'])}; "
+            "esa fecha es anterior."
+        )
+    if materia["fecha_fin"] and fecha_texto > materia["fecha_fin"]:
+        return (
+            f"{materia['nombre']} termina el {formatear_fecha(materia['fecha_fin'])}; "
+            "esa fecha es posterior."
+        )
+    return None
+
+
+@app.route("/pasar-lista", methods=["GET", "POST"])
+def pasar_lista():
+    """Elegir la materia y la fecha de la lista y validar que sea día de clase."""
+    id_materia = fecha = ""
+    error = None
+    if request.method == "POST":
+        id_materia = request.form.get("id_materia", "").strip()
+        fecha = request.form.get("fecha", "").strip()
+        materia = db.obtener_materia(id_materia)
+        error = validar_dia_de_clase(materia, fecha)
+    return render_template(
+        "pasar_lista.html",
+        materias=db.listar_materias(),
+        id_materia=id_materia,
+        fecha=fecha,
+        error=error,
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
