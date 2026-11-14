@@ -41,5 +41,45 @@
       </div>
     </div>
   </form>
+
+  <h2 class="h5">Lista de alumnos por materia</h2>
+  <form method="get" action="/alumnos" class="row g-2 mb-3">
+    <div class="col-sm-8 col-md-6">
+      <select class="form-select" name="materia" aria-label="Materia">
+        <option value="">Selecciona una materia…</option>
+        {% for m in materias %}
+          <option value="{{ m.id_materia }}" {% if materia_sel and materia_sel.id_materia == m.id_materia %}selected{% endif %}>{{ m.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-outline-secondary">Ver alumnos</button>
+    </div>
+  </form>
+
+  {% if materia_sel %}
+    {% if alumnos %}
+      <p class="text-muted mb-2">{{ materia_sel.nombre }}: {{ alumnos|length }} alumno(s)</p>
+      <div class="table-responsive">
+        <table class="table table-striped bg-white">
+          <thead class="table-dark">
+            <tr><th>#</th><th>Número de cuenta</th><th>Nombre</th><th>Correo</th></tr>
+          </thead>
+          <tbody>
+            {% for a in alumnos %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ a.numero_cuenta }}</td>
+                <td>{{ a.nombre }}</td>
+                <td>{{ a.correo }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted">{{ materia_sel.nombre }} todavía no tiene alumnos registrados.</p>
+    {% endif %}
+  {% endif %}
 {% endif %}
 {% endblock %}

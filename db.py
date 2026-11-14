@@ -110,3 +110,9 @@ def existe_alumno(id_materia, numero_cuenta):
         (id_materia, numero_cuenta),
     ).fetchone()
     return fila is not None
+
+
+def listar_alumnos(id_materia):
+    return get_db().execute(
+        "SELECT * FROM alumno WHERE id_materia = ? ORDER BY nombre", (id_materia,)
+    ).fetchall()

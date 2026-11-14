@@ -99,7 +99,12 @@ def validar_alumno(datos):
 
 @app.route("/alumnos", methods=["GET", "POST"])
 def alumnos():
-    datos = {"id_materia": "", "numero_cuenta": "", "nombre": "", "correo": ""}
+    datos = {
+        "id_materia": request.args.get("materia", ""),
+        "numero_cuenta": "",
+        "nombre": "",
+        "correo": "",
+    }
     if request.method == "POST":
         datos = {campo: request.form.get(campo, "").strip() for campo in datos}
         errores = validar_alumno(datos)
@@ -111,10 +116,20 @@ def alumnos():
                 datos["correo"],
             )
             flash("Alumno guardado correctamente.", "success")
-            return redirect(url_for("alumnos"))
+            return redirect(url_for("alumnos", materia=datos["id_materia"]))
         for error in errores:
             flash(error, "danger")
-    return render_template("alumnos.html", materias=db.listar_materias(), datos=datos)
+
+    # Lista de alumnos de la materia elegida (?materia=ID) o recién usada en el formulario.
+    materia_sel = db.obtener_materia(datos["id_materia"])
+    lista = db.listar_alumnos(materia_sel["id_materia"]) if materia_sel else []
+    return render_template(
+        "alumnos.html",
+        materias=db.listar_materias(),
+        datos=datos,
+        materia_sel=materia_sel,
+        alumnos=lista,
+    )
 
 
 # ------------------------------------------------- Asistencia (HU03, HU04, HU05)
