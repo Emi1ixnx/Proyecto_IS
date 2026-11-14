@@ -101,3 +101,12 @@ def guardar_alumno(id_materia, numero_cuenta, nombre, correo):
     )
     conexion.commit()
     return cursor.lastrowid
+
+
+def existe_alumno(id_materia, numero_cuenta):
+    """RN03: el número de cuenta no se repite dentro de la materia."""
+    fila = get_db().execute(
+        "SELECT 1 FROM alumno WHERE id_materia = ? AND numero_cuenta = ?",
+        (id_materia, numero_cuenta),
+    ).fetchone()
+    return fila is not None

@@ -1,4 +1,4 @@
-it"""Sistema de Control de Asistencia de Alumnos (versión 1.0).
+"""Sistema de Control de Asistencia de Alumnos (versión 1.0).
 
 Aplicación web con Flask y SQLite: el profesor registra materias y alumnos,
 pasa lista por fecha y consulta el resumen de asistencia.
@@ -77,18 +77,44 @@ def materias():
 
 
 # ---------------------------------------------------------------- Alumnos (HU02)
+def validar_alumno(datos):
+    """RN03 y RN04. Devuelve la lista de errores (vacía si todo está bien)."""
+    errores = []
+    if db.obtener_materia(datos["id_materia"]) is None:
+        errores.append("Selecciona una materia registrada.")
+    if not datos["numero_cuenta"]:
+        errores.append("El número de cuenta es obligatorio.")
+    if not datos["nombre"]:
+        errores.append("El nombre del alumno es obligatorio.")
+    if not datos["correo"]:
+        errores.append("El correo del alumno es obligatorio.")
+    elif "@" not in datos["correo"]:
+        errores.append("El correo no es válido.")
+    if not errores and db.existe_alumno(datos["id_materia"], datos["numero_cuenta"]):
+        errores.append(
+            f"El número de cuenta {datos['numero_cuenta']} ya está registrado en esta materia."
+        )
+    return errores
+
+
 @app.route("/alumnos", methods=["GET", "POST"])
 def alumnos():
+    datos = {"id_materia": "", "numero_cuenta": "", "nombre": "", "correo": ""}
     if request.method == "POST":
-        db.guardar_alumno(
-            request.form.get("id_materia", ""),
-            request.form.get("numero_cuenta", "").strip(),
-            request.form.get("nombre", "").strip(),
-            request.form.get("correo", "").strip(),
-        )
-        flash("Alumno guardado correctamente.", "success")
-        return redirect(url_for("alumnos"))
-    return render_template("alumnos.html", materias=db.listar_materias(), datos={})
+        datos = {campo: request.form.get(campo, "").strip() for campo in datos}
+        errores = validar_alumno(datos)
+        if not errores:
+            db.guardar_alumno(
+                int(datos["id_materia"]),
+                datos["numero_cuenta"],
+                datos["nombre"],
+                datos["correo"],
+            )
+            flash("Alumno guardado correctamente.", "success")
+            return redirect(url_for("alumnos"))
+        for error in errores:
+            flash(error, "danger")
+    return render_template("alumnos.html", materias=db.listar_materias(), datos=datos)
 
 
 # ------------------------------------------------- Asistencia (HU03, HU04, HU05)
@@ -142,11 +168,6 @@ def pasar_lista():
         id_materia=id_materia,
         fecha=fecha,
         error=error,
-@app.route("/pasar-lista")
-def pasar_lista():
-    """Pantalla para elegir la materia y la fecha de la lista."""
-    return render_template(
-        "pasar_lista.html", materias=db.listar_materias(), id_materia="", fecha=""
     )
 
 
