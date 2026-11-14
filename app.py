@@ -1,4 +1,4 @@
-"""Sistema de Control de Asistencia de Alumnos (versión 1.0).
+it"""Sistema de Control de Asistencia de Alumnos (versión 1.0).
 
 Aplicación web con Flask y SQLite: el profesor registra materias y alumnos,
 pasa lista por fecha y consulta el resumen de asistencia.
@@ -142,6 +142,11 @@ def pasar_lista():
         id_materia=id_materia,
         fecha=fecha,
         error=error,
+@app.route("/pasar-lista")
+def pasar_lista():
+    """Pantalla para elegir la materia y la fecha de la lista."""
+    return render_template(
+        "pasar_lista.html", materias=db.listar_materias(), id_materia="", fecha=""
     )
 
 

@@ -78,3 +78,26 @@ def guardar_materia(nombre, dias_clase, fecha_inicio=None, fecha_fin=None):
 
 def listar_materias():
     return get_db().execute("SELECT * FROM materia ORDER BY nombre").fetchall()
+
+
+def obtener_materia(id_materia):
+    """Devuelve la materia, o None si no existe o el id no es válido."""
+    try:
+        id_materia = int(id_materia)
+    except (TypeError, ValueError):
+        return None
+    return get_db().execute(
+        "SELECT * FROM materia WHERE id_materia = ?", (id_materia,)
+    ).fetchone()
+
+
+# ----------------------------------------------------------------- Alumnos
+def guardar_alumno(id_materia, numero_cuenta, nombre, correo):
+    conexion = get_db()
+    cursor = conexion.execute(
+        "INSERT INTO alumno (numero_cuenta, nombre, correo, id_materia) "
+        "VALUES (?, ?, ?, ?)",
+        (numero_cuenta, nombre, correo, id_materia),
+    )
+    conexion.commit()
+    return cursor.lastrowid
