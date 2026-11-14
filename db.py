@@ -80,6 +80,17 @@ def listar_materias():
     return get_db().execute("SELECT * FROM materia ORDER BY nombre").fetchall()
 
 
+def obtener_materia(id_materia):
+    """Devuelve la materia, o None si no existe o el id no es válido."""
+    try:
+        id_materia = int(id_materia)
+    except (TypeError, ValueError):
+        return None
+    return get_db().execute(
+        "SELECT * FROM materia WHERE id_materia = ?", (id_materia,)
+    ).fetchone()
+
+
 # ----------------------------------------------------------------- Alumnos
 def guardar_alumno(id_materia, numero_cuenta, nombre, correo):
     conexion = get_db()

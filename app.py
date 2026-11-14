@@ -91,5 +91,13 @@ def alumnos():
     return render_template("alumnos.html", materias=db.listar_materias(), datos={})
 
 
+@app.route("/pasar-lista")
+def pasar_lista():
+    """Pantalla para elegir la materia y la fecha de la lista."""
+    return render_template(
+        "pasar_lista.html", materias=db.listar_materias(), id_materia="", fecha=""
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
