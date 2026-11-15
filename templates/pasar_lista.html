@@ -3,6 +3,12 @@
 
 {% block contenido %}
 <h1 class="h3 mb-3">Pasar lista</h1>
+
+{% if error %}
+  <div class="alert alert-danger" role="alert">
+    <strong>No se puede pasar lista.</strong> {{ error }}
+  </div>
+{% endif %}
 {% if not materias %}
   <div class="alert alert-warning">
     Primero registra una materia en <a href="/materias" class="alert-link">Materias</a>
