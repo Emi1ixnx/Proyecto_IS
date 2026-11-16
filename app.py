@@ -169,20 +169,28 @@ def validar_dia_de_clase(materia, fecha_texto):
 
 @app.route("/pasar-lista", methods=["GET", "POST"])
 def pasar_lista():
-    """Elegir la materia y la fecha de la lista y validar que sea día de clase."""
+    """Elegir materia y fecha, validar el día de clase y mostrar la lista de alumnos."""
     id_materia = fecha = ""
-    error = None
+    error = materia = lista = None
     if request.method == "POST":
         id_materia = request.form.get("id_materia", "").strip()
         fecha = request.form.get("fecha", "").strip()
         materia = db.obtener_materia(id_materia)
         error = validar_dia_de_clase(materia, fecha)
+        if error is None:
+            lista = db.listar_alumnos(materia["id_materia"])
+            if not lista:
+                error = "Esta materia aún no tiene alumnos registrados."
+        if error is not None:
+            materia = lista = None
     return render_template(
         "pasar_lista.html",
         materias=db.listar_materias(),
         id_materia=id_materia,
         fecha=fecha,
         error=error,
+        materia=materia,
+        alumnos=lista,
     )
 
 
