@@ -37,4 +37,44 @@
   </div>
 </form>
 {% endif %}
+{% if materia and alumnos %}
+<form method="post" action="/pasar-lista/guardar" class="card mb-4">
+  <input type="hidden" name="id_materia" value="{{ materia.id_materia }}">
+  <input type="hidden" name="fecha" value="{{ fecha }}">
+  <div class="card-header">
+    <strong>{{ materia.nombre }}</strong> · {{ fecha[8:10] }}/{{ fecha[5:7] }}/{{ fecha[0:4] }}
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped align-middle mb-0">
+      <thead>
+        <tr><th>#</th><th>Número de cuenta</th><th>Alumno</th><th class="text-center">Asistencia</th></tr>
+      </thead>
+      <tbody>
+        {% for a in alumnos %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ a.numero_cuenta }}</td>
+            <td>{{ a.nombre }}</td>
+            <td class="text-center">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="estado_{{ a.id_alumno }}"
+                       id="presente_{{ a.id_alumno }}" value="Presente" checked>
+                <label class="form-check-label" for="presente_{{ a.id_alumno }}">Presente</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="estado_{{ a.id_alumno }}"
+                       id="ausente_{{ a.id_alumno }}" value="Ausente">
+                <label class="form-check-label" for="ausente_{{ a.id_alumno }}">Ausente</label>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-footer text-end">
+    <button type="submit" class="btn btn-success">Guardar asistencia</button>
+  </div>
+</form>
+{% endif %}
 {% endblock %}
