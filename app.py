@@ -180,6 +180,10 @@ def pasar_lista():
         fecha = request.form.get("fecha", "").strip()
         materia = db.obtener_materia(id_materia)
         error = validar_dia_de_clase(materia, fecha)
+        if error is None and db.lista_existe(materia["id_materia"], fecha):
+            error = (
+                f"Ya se pasó lista de {materia['nombre']} el {formatear_fecha(fecha)}."
+            )  # RN07
         if error is None:
             lista = db.listar_alumnos(materia["id_materia"])
             if not lista:
@@ -204,6 +208,8 @@ def guardar_lista():
     fecha = request.form.get("fecha", "").strip()
     error = validar_dia_de_clase(materia, fecha)
     estados = {}
+    if error is None and db.lista_existe(materia["id_materia"], fecha):
+        error = f"Ya se pasó lista de {materia['nombre']} el {formatear_fecha(fecha)}."  # RN07
     if error is None:
         for alumno in db.listar_alumnos(materia["id_materia"]):
             estados[alumno["id_alumno"]] = request.form.get(
@@ -213,11 +219,12 @@ def guardar_lista():
             error = "Esta materia aún no tiene alumnos registrados."
         elif any(estado not in ESTADOS for estado in estados.values()):
             error = "Marca presente o ausente a cada alumno."
+        elif not db.guardar_asistencia(materia["id_materia"], fecha, estados):
+            error = "No se pudo guardar: ya existe una lista para esa fecha."
 
     if error is not None:
         flash(error, "danger")
     else:
-        db.guardar_asistencia(materia["id_materia"], fecha, estados)
         flash(
             f"Asistencia de {materia['nombre']} del {formatear_fecha(fecha)} guardada "
             f"({len(estados)} alumnos).",

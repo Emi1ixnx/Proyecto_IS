@@ -119,12 +119,28 @@ def listar_alumnos(id_materia):
 
 
 # -------------------------------------------------------------- Asistencia
+def lista_existe(id_materia, fecha):
+    """RN07: para una misma materia y fecha solo existe una lista."""
+    fila = get_db().execute(
+        "SELECT 1 FROM asistencia WHERE id_materia = ? AND fecha = ? LIMIT 1",
+        (id_materia, fecha),
+    ).fetchone()
+    return fila is not None
+
+
 def guardar_asistencia(id_materia, fecha, estados):
-    """estados = {id_alumno: 'Presente' | 'Ausente'}. Se guarda todo o nada."""
+    """estados = {id_alumno: 'Presente' | 'Ausente'}. Se guarda todo o nada.
+
+    Devuelve False si la base de datos rechaza el registro (lista repetida).
+    """
     conexion = get_db()
-    with conexion:  # un solo commit: si algo falla, no se guarda ninguna fila
-        conexion.executemany(
-            "INSERT INTO asistencia (id_materia, id_alumno, fecha, estado) "
-            "VALUES (?, ?, ?, ?)",
-            [(id_materia, id_alumno, fecha, estado) for id_alumno, estado in estados.items()],
-        )
+    try:
+        with conexion:  # un solo commit: si algo falla, no se guarda ninguna fila
+            conexion.executemany(
+                "INSERT INTO asistencia (id_materia, id_alumno, fecha, estado) "
+                "VALUES (?, ?, ?, ?)",
+                [(id_materia, id_alumno, fecha, estado) for id_alumno, estado in estados.items()],
+            )
+    except sqlite3.IntegrityError:
+        return False
+    return True
