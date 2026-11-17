@@ -116,3 +116,15 @@ def listar_alumnos(id_materia):
     return get_db().execute(
         "SELECT * FROM alumno WHERE id_materia = ? ORDER BY nombre", (id_materia,)
     ).fetchall()
+
+
+# -------------------------------------------------------------- Asistencia
+def guardar_asistencia(id_materia, fecha, estados):
+    """estados = {id_alumno: 'Presente' | 'Ausente'}. Se guarda todo o nada."""
+    conexion = get_db()
+    with conexion:  # un solo commit: si algo falla, no se guarda ninguna fila
+        conexion.executemany(
+            "INSERT INTO asistencia (id_materia, id_alumno, fecha, estado) "
+            "VALUES (?, ?, ?, ?)",
+            [(id_materia, id_alumno, fecha, estado) for id_alumno, estado in estados.items()],
+        )

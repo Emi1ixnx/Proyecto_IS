@@ -167,6 +167,9 @@ def validar_dia_de_clase(materia, fecha_texto):
     return None
 
 
+ESTADOS = ("Presente", "Ausente")  # RN06
+
+
 @app.route("/pasar-lista", methods=["GET", "POST"])
 def pasar_lista():
     """Elegir materia y fecha, validar el día de clase y mostrar la lista de alumnos."""
@@ -192,6 +195,35 @@ def pasar_lista():
         materia=materia,
         alumnos=lista,
     )
+
+
+@app.route("/pasar-lista/guardar", methods=["POST"])
+def guardar_lista():
+    """Guarda la asistencia de todos los alumnos de la materia en la fecha elegida."""
+    materia = db.obtener_materia(request.form.get("id_materia", "").strip())
+    fecha = request.form.get("fecha", "").strip()
+    error = validar_dia_de_clase(materia, fecha)
+    estados = {}
+    if error is None:
+        for alumno in db.listar_alumnos(materia["id_materia"]):
+            estados[alumno["id_alumno"]] = request.form.get(
+                f"estado_{alumno['id_alumno']}", ""
+            )
+        if not estados:
+            error = "Esta materia aún no tiene alumnos registrados."
+        elif any(estado not in ESTADOS for estado in estados.values()):
+            error = "Marca presente o ausente a cada alumno."
+
+    if error is not None:
+        flash(error, "danger")
+    else:
+        db.guardar_asistencia(materia["id_materia"], fecha, estados)
+        flash(
+            f"Asistencia de {materia['nombre']} del {formatear_fecha(fecha)} guardada "
+            f"({len(estados)} alumnos).",
+            "success",
+        )
+    return redirect(url_for("pasar_lista"))
 
 
 if __name__ == "__main__":
