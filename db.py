@@ -144,3 +144,27 @@ def guardar_asistencia(id_materia, fecha, estados):
     except sqlite3.IntegrityError:
         return False
     return True
+
+
+# ----------------------------------------------------------------- Resumen
+def resumen_materia(id_materia):
+    """Devuelve (filas, total_listas): asistencias y faltas de cada alumno."""
+    conexion = get_db()
+    total_listas = conexion.execute(
+        "SELECT COUNT(DISTINCT fecha) FROM asistencia WHERE id_materia = ?",
+        (id_materia,),
+    ).fetchone()[0]
+    filas = conexion.execute(
+        """
+        SELECT a.id_alumno, a.numero_cuenta, a.nombre,
+               COALESCE(SUM(s.estado = 'Presente'), 0) AS asistencias,
+               COALESCE(SUM(s.estado = 'Ausente'), 0) AS faltas
+        FROM alumno a
+        LEFT JOIN asistencia s ON s.id_alumno = a.id_alumno
+        WHERE a.id_materia = ?
+        GROUP BY a.id_alumno
+        ORDER BY a.nombre
+        """,
+        (id_materia,),
+    ).fetchall()
+    return [dict(fila) for fila in filas], total_listas
