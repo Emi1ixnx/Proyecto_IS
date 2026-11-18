@@ -147,8 +147,15 @@ def guardar_asistencia(id_materia, fecha, estados):
 
 
 # ----------------------------------------------------------------- Resumen
+def calcular_porcentaje(asistencias, total_listas):
+    """RN08: asistencias del alumno / listas registradas de la materia * 100."""
+    if total_listas == 0:
+        return 0.0
+    return round(asistencias * 100 / total_listas, 1)
+
+
 def resumen_materia(id_materia):
-    """Devuelve (filas, total_listas): asistencias y faltas de cada alumno."""
+    """Devuelve (filas, total_listas): asistencias, faltas y porcentaje por alumno."""
     conexion = get_db()
     total_listas = conexion.execute(
         "SELECT COUNT(DISTINCT fecha) FROM asistencia WHERE id_materia = ?",
@@ -167,4 +174,9 @@ def resumen_materia(id_materia):
         """,
         (id_materia,),
     ).fetchall()
-    return [dict(fila) for fila in filas], total_listas
+    resultado = []
+    for fila in filas:
+        fila = dict(fila)
+        fila["porcentaje"] = calcular_porcentaje(fila["asistencias"], total_listas)
+        resultado.append(fila)
+    return resultado, total_listas
