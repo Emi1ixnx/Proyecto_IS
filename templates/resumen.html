@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Resumen{% endblock %}
+
+{% block contenido %}
+<h1 class="h3 mb-3">Resumen de asistencia</h1>
+
+<form method="get" action="/resumen" class="card card-body mb-4">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-8">
+      <label for="materia" class="form-label">Materia</label>
+      <select class="form-select" id="materia" name="materia" required>
+        <option value="">Selecciona una materia…</option>
+        {% for m in materias %}
+          <option value="{{ m.id_materia }}" {% if materia and materia.id_materia == m.id_materia %}selected{% endif %}>{{ m.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-primary w-100">Ver resumen</button>
+    </div>
+  </div>
+</form>
+
+{% if materia %}
+  <h2 class="h5">{{ materia.nombre }}</h2>
+  {% if filas %}
+    <table class="table table-sm bg-white">
+      <thead>
+        <tr><th>Número de cuenta</th><th>Alumno</th><th>Asistencias</th><th>Faltas</th></tr>
+      </thead>
+      <tbody>
+        {% for f in filas %}
+          <tr>
+            <td>{{ f.numero_cuenta }}</td>
+            <td>{{ f.nombre }}</td>
+            <td>{{ f.asistencias }}</td>
+            <td>{{ f.faltas }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-muted">Esta materia todavía no tiene alumnos registrados.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

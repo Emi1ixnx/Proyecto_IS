@@ -233,5 +233,22 @@ def guardar_lista():
     return redirect(url_for("pasar_lista"))
 
 
+# ------------------------------------------------------ Resultados (HU06, HU07)
+@app.route("/resumen")
+def resumen():
+    """Resumen de asistencias y faltas de la materia elegida (?materia=ID)."""
+    materia = db.obtener_materia(request.args.get("materia", ""))
+    filas, total_listas = [], 0
+    if materia:
+        filas, total_listas = db.resumen_materia(materia["id_materia"])
+    return render_template(
+        "resumen.html",
+        materias=db.listar_materias(),
+        materia=materia,
+        filas=filas,
+        total_listas=total_listas,
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
