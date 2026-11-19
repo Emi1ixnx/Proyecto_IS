@@ -38,3 +38,8 @@ class BaseTest(unittest.TestCase):
     def crear_alumno(self, id_materia, cuenta="1001", nombre="Ana", correo="ana@aragon.unam.mx"):
         with app.app_context():
             return db.guardar_alumno(id_materia, cuenta, nombre, correo)
+
+    def registrar_lista(self, id_materia, fecha, estados):
+        """Guarda una lista directo en la base. estados = {id_alumno: 'Presente'|'Ausente'}."""
+        with app.app_context():
+            db.guardar_asistencia(id_materia, fecha, estados)
