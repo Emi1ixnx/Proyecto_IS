@@ -22,25 +22,54 @@
 </form>
 
 {% if materia %}
-  <h2 class="h5">{{ materia.nombre }}</h2>
-  {% if filas %}
-    <table class="table table-sm bg-white">
-      <thead>
-        <tr><th>Número de cuenta</th><th>Alumno</th><th>Asistencias</th><th>Faltas</th></tr>
-      </thead>
-      <tbody>
-        {% for f in filas %}
-          <tr>
-            <td>{{ f.numero_cuenta }}</td>
-            <td>{{ f.nombre }}</td>
-            <td>{{ f.asistencias }}</td>
-            <td>{{ f.faltas }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="d-flex flex-wrap justify-content-between align-items-end mb-2">
+    <h2 class="h5 mb-0">{{ materia.nombre }}</h2>
+    <span class="text-muted">Listas registradas: <strong>{{ total_listas }}</strong></span>
+  </div>
+
+  {% if not filas %}
+    <div class="alert alert-info">Esta materia todavía no tiene alumnos registrados.</div>
   {% else %}
-    <p class="text-muted">Esta materia todavía no tiene alumnos registrados.</p>
+    {% if total_listas == 0 %}
+      <div class="alert alert-info">Todavía no se ha pasado lista en esta materia; los porcentajes aparecerán al guardar la primera.</div>
+    {% endif %}
+    <div class="table-responsive">
+      <table class="table table-striped align-middle bg-white">
+        <thead class="table-dark">
+          <tr>
+            <th>Número de cuenta</th>
+            <th>Alumno</th>
+            <th class="text-center">Asistencias</th>
+            <th class="text-center">Faltas</th>
+            <th style="min-width: 200px;">% de asistencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in filas %}
+            {% set color = 'success' if f.porcentaje >= 80 else ('warning' if f.porcentaje >= 60 else 'danger') %}
+            <tr>
+              <td>{{ f.numero_cuenta }}</td>
+              <td>{{ f.nombre }}</td>
+              <td class="text-center">{{ f.asistencias }}</td>
+              <td class="text-center">{{ f.faltas }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" role="progressbar" aria-label="Porcentaje de asistencia de {{ f.nombre }}"
+                       aria-valuenow="{{ f.porcentaje }}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar bg-{{ color }}" style="width: {{ f.porcentaje }}%"></div>
+                  </div>
+                  <span class="badge text-bg-{{ color }}">{{ '%.1f'|format(f.porcentaje) }}%</span>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="text-muted small mb-0">
+      Porcentaje = asistencias del alumno ÷ listas registradas de la materia × 100.
+      Verde desde 80 %, amarillo desde 60 %, rojo por debajo de 60 %.
+    </p>
   {% endif %}
 {% endif %}
 {% endblock %}
