@@ -1,4 +1,4 @@
-# Sistema de Control de Asistencia de Alumnos (v1.0)
+# Sistema de Control de Asistencia de Alumnos
 
 Aplicación web hecha con Flask y SQLite para que un profesor registre sus materias y alumnos,
 pase lista por fecha y consulte el resumen de asistencia.
@@ -47,4 +47,4 @@ asistencia/
 python -m unittest discover -s tests -t . -v
 ```
 
-Equipo: Emiliano, Julio Ian, Amanda, Rodrigo y Natalia.
+Equipo: Amanda, Emiliano, Julio Ian, y Rodrigo
